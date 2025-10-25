@@ -1,71 +1,42 @@
-# terminalhistory README
+# Terminal History 📋
 
-This is the README for your extension "terminalhistory". After writing up a brief description, we recommend including the following sections.
+A simple VS Code extension that logs all your terminal command outputs to a dedicated sidebar view for easy copying.
 
-## Features
-
-Describe specific features of your extension including screenshots of your extension in action. Image paths are relative to this README file.
-
-For example if there is an image subfolder under your extension project workspace:
-
-\!\[feature X\]\(images/feature-x.png\)
-
-> Tip: Many popular extensions utilize animations. This is an excellent way to show off your extension! We recommend short, focused animations that are easy to follow.
-
-## Requirements
-
-If you have any requirements or dependencies, add a section describing those and how to install and configure them.
-
-## Extension Settings
-
-Include if your extension adds any VS Code settings through the `contributes.configuration` extension point.
-
-For example:
-
-This extension contributes the following settings:
-
-* `myExtension.enable`: Enable/disable this extension.
-* `myExtension.thing`: Set to `blah` to do something.
-
-## Known Issues
-
-Calling out known issues can help limit users opening duplicate issues against your extension.
-
-## Release Notes
-
-Users appreciate release notes as you update your extension.
-
-### 1.0.0
-
-Initial release of ...
-
-### 1.0.1
-
-Fixed issue #.
-
-### 1.1.0
-
-Added features X, Y, and Z.
+Tired of scrolling endlessly through your terminal to find and copy a specific error message or command output? Terminal History solves this by creating a clean, structured log of every command you run, right in your sidebar.
 
 ---
 
-## Following extension guidelines
+## Features
 
-Ensure that you've read through the extensions guidelines and follow the best practices for creating your extension.
+* **Automatic Logging:** Automatically captures the command and its full output every time you run a command in the integrated terminal.
+* **Clean Sidebar View:** Displays a scrollable list of your command history in a new "Terminal History" view in the Activity Bar.
+* **One-Click Copy:** A convenient "Copy" icon appears on every entry. Click it to instantly copy the entire output to your clipboard, ready to be pasted into an AI, a search engine, or a document.
 
-* [Extension Guidelines](https://code.visualstudio.com/api/references/extension-guidelines)
+---
 
-## Working with Markdown
+## How to Use
 
-You can author your README using Visual Studio Code. Here are some useful editor keyboard shortcuts:
+1.  Install the extension.
+2.  Click the new **Terminal History icon** (a list icon) in your VS Code Activity Bar to open the view.
+3.  Open an integrated terminal (`Ctrl + ~`).
+4.  Run any command (e.g., `git status`, `npm run dev`).
+5.  The command and its full output will automatically appear in the sidebar.
+6.  Hover over an item and click the clipboard icon to copy its full output.
 
-* Split the editor (`Cmd+\` on macOS or `Ctrl+\` on Windows and Linux).
-* Toggle preview (`Shift+Cmd+V` on macOS or `Shift+Ctrl+V` on Windows and Linux).
-* Press `Ctrl+Space` (Windows, Linux, macOS) to see a list of Markdown snippets.
+---
 
-## For more information
+## Requirements
 
-* [Visual Studio Code's Markdown Support](http://code.visualstudio.com/docs/languages/markdown)
-* [Markdown Syntax Reference](https://help.github.com/articles/markdown-basics/)
+This extension relies on VS Code's **Shell Integration** to detect when commands finish and read their output.
 
-**Enjoy!**
+If your commands are not appearing in the history, please ensure Shell Integration is **enabled** in your terminal. You can typically enable it from the terminal's "sparkle" icon (✨) or by running the `Terminal: Manage Shell Integration` command.
+
+---
+
+## Known Issues
+
+No known issues at this time. If you find a bug, please open an issue on the [**GitHub repository**](https://github.com/EternalKnight002/terminalHistory/issues).
+
+## Release Notes
+
+See the [CHANGELOG.md](CHANGELOG.md) file for details on each release.
