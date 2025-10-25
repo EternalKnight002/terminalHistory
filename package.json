@@ -1,0 +1,70 @@
+{
+  "name": "terminalhistory",
+  "displayName": "TerminalHistory",
+  "description": "Logs terminal output for easy copying.",
+  "version": "0.0.1",
+  "engines": {
+    "vscode": "^1.83.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "terminalHistory.copyOutput",
+        "title": "Copy Output",
+        "icon": "$(clippy)"
+      }
+    ],
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "terminal-history-container",
+          "title": "Terminal History",
+          "icon": "resources/history.svg"
+        }
+      ]
+    },
+    "views": {
+      "terminal-history-container": [
+        {
+          "id": "terminal-history-view",
+          "name": "History",
+          "icon": "resources/history.svg"
+        }
+      ]
+    },
+    "menus": {
+      "view/item/context": [
+        {
+          "command": "terminalHistory.copyOutput",
+          "when": "view == terminal-history-view",
+          "group": "inline"
+        }
+      ]
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "pretest": "npm run compile && npm run lint",
+    "lint": "eslint src --ext ts"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.83.0",
+    "@types/mocha": "^10.0.3",
+    "@types/node": "18.x",
+    "@typescript-eslint/eslint-plugin": "^6.9.0",
+    "@typescript-eslint/parser": "^6.9.0",
+    "eslint": "^8.52.0",
+    "glob": "^10.3.10",
+    "mocha": "^10.2.0",
+    "typescript": "^5.2.2"
+  }
+}
