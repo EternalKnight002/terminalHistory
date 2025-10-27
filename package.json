@@ -1,8 +1,8 @@
 {
   "name": "terminalhistory",
-  "displayName": "TerminalHistory",
-  "description": "Logs terminal output for easy copying.",
-  "version": "0.0.1",
+  "displayName": "Terminal History",
+  "description": "Logs terminal command outputs for easy copying",
+  "version": "0.1.0",
   "engines": {
     "vscode": "^1.83.0"
   },
@@ -18,7 +18,17 @@
       {
         "command": "terminalHistory.copyOutput",
         "title": "Copy Output",
-        "icon": "$(clippy)"
+        "icon": "$(copy)"
+      },
+      {
+        "command": "terminalHistory.clearHistory",
+        "title": "Clear History",
+        "icon": "$(clear-all)"
+      },
+      {
+        "command": "terminalHistory.captureProblems",
+        "title": "Capture Problems",
+        "icon": "$(issues)"
       }
     ],
     "viewsContainers": {
@@ -34,16 +44,27 @@
       "terminal-history-container": [
         {
           "id": "terminal-history-view",
-          "name": "History",
-          "icon": "resources/history.svg"
+          "name": "Command History"
         }
       ]
     },
     "menus": {
+      "view/title": [
+        {
+          "command": "terminalHistory.captureProblems",
+          "when": "view == terminal-history-view",
+          "group": "navigation@1"
+        },
+        {
+          "command": "terminalHistory.clearHistory",
+          "when": "view == terminal-history-view",
+          "group": "navigation@2"
+        }
+      ],
       "view/item/context": [
         {
           "command": "terminalHistory.copyOutput",
-          "when": "view == terminal-history-view",
+          "when": "view == terminal-history-view && viewItem == historyItem",
           "group": "inline"
         }
       ]

@@ -1,42 +1,13 @@
-# Terminal History 📋
+Terminal History 📋A VS Code extension that automatically captures and logs all your terminal command outputs for easy copying.✨ FeaturesAutomatic Capture: Automatically logs every command and its full output from the integrated terminalVisual Status: See success (✓) or error (✗) icons based on exit codesQuick Copy: Click any history item to instantly copy its output to clipboardSmart Display: View command, timestamp, and exit code at a glanceClear History: Remove old entries with one click🚀 UsageInstall the extensionClick the Terminal History icon in the Activity Bar (sidebar)Open an integrated terminal (Ctrl+~ or Cmd+~)Run any command (e.g., npm install, git status, python script.py)The command and output appear in the sidebar automaticallyClick any item to copy its full output to clipboard⚙️ RequirementsCRITICAL: This extension requires VS Code's Shell Integration feature to be enabled.Enabling Shell IntegrationShell Integration is usually enabled by default, but if commands aren't appearing:Open VS Code settings (Ctrl+, or Cmd+,)Search for "terminal.integrated.shellIntegration"Ensure the following settings are enabled:✅ Terminal > Integrated > Shell Integration: Enabled (checked)✅ Terminal > Integrated > Shell Integration: Show Welcome (optional)Checking Shell Integration StatusIn your terminal, you should see a small "sparkle" icon (✨) or arrow icon next to the command prompt. This indicates Shell Integration is active.If you don't see it:Close all terminalsOpen a new terminalLook for the icon or run: Terminal: Manage Shell Integration from Command PaletteSupported Shells✅ Bash✅ Zsh✅ PowerShell✅ Fish⚠️ Cmd (limited support)🐛 TroubleshootingCommands not appearing in historyCheck Shell Integration: Follow the steps above to enable itRestart VS Code: After enabling Shell IntegrationCheck the Output panel: View > Output > Select "Terminal History" to see debug logsTry a simple command: Run echo "test" to verify it's working"Error reading output" messageThis can happen if:Shell Integration is not properly initializedThe terminal was closed too quickly after the commandThe command output is binary dataNo output capturedSome commands that don't write to stdout (like cd) won't show output. This is normal.📝 TipsLong outputs: The extension shows the first line as a preview. Click to copy the full output.Exit codes: Green checkmark (✓) = success (0), Red X (✗) = error (non-zero)Clear history: Click the clear icon in the Terminal History panel titleKeyboard shortcut: You can add a custom keybinding for terminalHistory.copyOutput🔧 Known IssuesCommands that prompt for input (like sudo) may not capture output correctlyVery large outputs (>10MB) may be truncatedBinary output is not supported📦 DevelopmentTo develop or modify this extension:# Clone the repository
+git clone [https://github.com/EternalKnight002/terminalHistory.git](https://github.com/EternalKnight002/terminalHistory.git)
+cd terminalHistory
 
-A simple VS Code extension that logs all your terminal command outputs to a dedicated sidebar view for easy copying.
+# Install dependencies
+npm install
 
-Tired of scrolling endlessly through your terminal to find and copy a specific error message or command output? Terminal History solves this by creating a clean, structured log of every command you run, right in your sidebar.
+# Compile TypeScript
+npm run compile
 
----
-
-## Features
-
-* **Automatic Logging:** Automatically captures the command and its full output every time you run a command in the integrated terminal.
-* **Clean Sidebar View:** Displays a scrollable list of your command history in a new "Terminal History" view in the Activity Bar.
-* **One-Click Copy:** A convenient "Copy" icon appears on every entry. Click it to instantly copy the entire output to your clipboard, ready to be pasted into an AI, a search engine, or a document.
-
----
-
-## How to Use
-
-1.  Install the extension.
-2.  Click the new **Terminal History icon** (a list icon) in your VS Code Activity Bar to open the view.
-3.  Open an integrated terminal (`Ctrl + ~`).
-4.  Run any command (e.g., `git status`, `npm run dev`).
-5.  The command and its full output will automatically appear in the sidebar.
-6.  Hover over an item and click the clipboard icon to copy its full output.
-
----
-
-## Requirements
-
-This extension relies on VS Code's **Shell Integration** to detect when commands finish and read their output.
-
-If your commands are not appearing in the history, please ensure Shell Integration is **enabled** in your terminal. You can typically enable it from the terminal's "sparkle" icon (✨) or by running the `Terminal: Manage Shell Integration` command.
-
----
-
-## Known Issues
-
-No known issues at this time. If you find a bug, please open an issue on the [**GitHub repository**](https://github.com/EternalKnight002/terminalHistory/issues).
-
-## Release Notes
-
-See the [CHANGELOG.md](CHANGELOG.md) file for details on each release.
+# Watch for changes
+npm run watch
+Press F5 in VS Code to launch Extension Development Host📄 LicenseThis project is licensed under the MIT License. See the LICENSE file for details.🤝 ContributingContributions are welcome! Please feel free to submit issues or pull requests.📮 FeedbackIf you encounter any issues or have suggestions, please open an issue on GitHub.

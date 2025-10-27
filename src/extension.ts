@@ -1,83 +1,164 @@
-// In src/extension.ts
 import * as vscode from 'vscode';
 import { HistoryDataProvider, HistoryTreeItem } from './historyDataProvider';
 
-// This method is called when your extension is activated
 export function activate(context: vscode.ExtensionContext) {
+    console.log('TerminalHistory extension is activating...');
 
-    // 1. Create and register our History Data Provider
+    // Create and register the History Data Provider
     const historyProvider = new HistoryDataProvider();
-    vscode.window.registerTreeDataProvider(
-      'terminal-history-view',
-      historyProvider
+    vscode.window.registerTreeDataProvider('terminal-history-view', historyProvider);
+
+    // Register the Copy command
+    const copyCommand = vscode.commands.registerCommand(
+        'terminalHistory.copyOutput',
+        (item: HistoryTreeItem) => {
+            if (item && item.fullOutput) {
+                vscode.env.clipboard.writeText(item.fullOutput);
+                vscode.window.showInformationMessage(`Copied output from: ${item.commandText}`);
+            } else {
+                vscode.window.showErrorMessage('Could not copy output.');
+            }
+        }
     );
 
-    // 2. Register our "Copy" command
-    let copyCommand = vscode.commands.registerCommand(
-      'terminalHistory.copyOutput', 
-      (item: HistoryTreeItem) => {
-        if (item && item.fullOutput) {
-            vscode.env.clipboard.writeText(item.fullOutput);
-            vscode.window.showInformationMessage('Terminal output copied!');
-        } else {
-            vscode.window.showErrorMessage('Could not copy item.');
+    // Register the Clear History command
+    const clearCommand = vscode.commands.registerCommand(
+        'terminalHistory.clearHistory',
+        () => {
+            historyProvider.clearHistory();
+            vscode.window.showInformationMessage('Terminal history cleared!');
         }
-    });
-    
-    // 3. Listen for completed terminal commands
-	console.log("TerminalHistory: Attaching terminal listener...");
-    let terminalCommandListener = vscode.window.onDidEndTerminalShellExecution(
-        
-        async (e: vscode.TerminalShellExecutionEndEvent) => {
-			console.log("TerminalHistory: Event Fired!");
-            if (e.exitCode === undefined) {
+    );
+
+    // Register the Capture Problems command
+    const captureProblemsCommand = vscode.commands.registerCommand(
+        'terminalHistory.captureProblems',
+        () => {
+            const diagnostics = vscode.languages.getDiagnostics();
+            
+            if (diagnostics.length === 0) {
+                vscode.window.showInformationMessage('No problems found!');
                 return;
             }
-            
-            const execution = e.execution;
 
-            // This helper function is now correct
-            async function getFullCommandOutput(
-                shellExecution: vscode.TerminalShellExecution
-            ): Promise<string> {
-                
-                return new Promise<string>(async (resolve) => {
-                    let output = '';
-                    const stream = await shellExecution.read(); 
+            let problemsText = '=== PROBLEMS ===\n\n';
+            let totalProblems = 0;
+
+            diagnostics.forEach(([uri, fileDiagnostics]) => {
+                if (fileDiagnostics.length > 0) {
+                    const relativePath = vscode.workspace.asRelativePath(uri);
+                    problemsText += `📄 ${relativePath}\n`;
                     
-                    try {
-                        for await (const chunk of stream) {
-                            output += chunk;
+                    fileDiagnostics.forEach(diagnostic => {
+                        totalProblems++;
+                        const severity = diagnostic.severity === vscode.DiagnosticSeverity.Error ? '❌ ERROR' :
+                                       diagnostic.severity === vscode.DiagnosticSeverity.Warning ? '⚠️  WARNING' :
+                                       diagnostic.severity === vscode.DiagnosticSeverity.Information ? 'ℹ️  INFO' : '💡 HINT';
+                        
+                        const line = diagnostic.range.start.line + 1;
+                        const col = diagnostic.range.start.character + 1;
+                        
+                        problemsText += `  ${severity} [Ln ${line}, Col ${col}]\n`;
+                        problemsText += `  ${diagnostic.message}\n`;
+                        if (diagnostic.source) {
+                            problemsText += `  Source: ${diagnostic.source}\n`;
                         }
-                        resolve(output);
-                    } catch (error) {
-                        console.error('Error reading from terminal stream:', error);
-                        resolve("Error reading output.");
-                    }
-                });
-            }
+                        problemsText += '\n';
+                    });
+                    problemsText += '\n';
+                }
+            });
 
-            // *** THE FIX IS HERE ***
-            // 'execution.commandLine' is an object. We call .toString()
-            // to get the actual command string.
-            const commandLine = execution.commandLine.toString(); 
-            
-            const output = await getFullCommandOutput(execution);
-
-            // This will now work, since commandLine is a string
+            // Add to history
             historyProvider.addEntry({
-                command: commandLine,
-                output: output.trim(),
+                command: `📋 Captured Problems (${totalProblems} total)`,
+                output: problemsText,
+                exitCode: totalProblems > 0 ? 1 : 0,
                 timestamp: new Date()
             });
+
+            vscode.window.showInformationMessage(`Captured ${totalProblems} problems to history!`);
         }
     );
 
-    // Add all our commands and listeners to the extension's subscriptions
-    context.subscriptions.push(copyCommand, terminalCommandListener);
+    // Listen for terminal command execution
+    console.log('TerminalHistory: Setting up terminal listener...');
+    
+    const terminalCommandListener = vscode.window.onDidEndTerminalShellExecution(
+        async (e: vscode.TerminalShellExecutionEndEvent) => {
+            try {
+                console.log('TerminalHistory: Command execution ended');
+                
+                const execution = e.execution;
+                
+                // Get the command that was executed
+                let commandText = '';
+                if (execution.commandLine) {
+                    if (typeof execution.commandLine === 'string') {
+                        commandText = execution.commandLine;
+                    } else if (execution.commandLine.value) {
+                        commandText = execution.commandLine.value;
+                    } else {
+                        commandText = String(execution.commandLine);
+                    }
+                }
 
-    vscode.window.showInformationMessage('TerminalHistory extension is now active!');
+                if (!commandText) {
+                    console.log('TerminalHistory: No command text found');
+                    return;
+                }
+
+                console.log('TerminalHistory: Command:', commandText);
+
+                // Read the output
+                let output = '';
+                try {
+                    const stream = execution.read();
+                    
+                    for await (const data of stream) {
+                        output += data;
+                    }
+                    
+                    console.log('TerminalHistory: Output captured, length:', output.length);
+                } catch (readError) {
+                    console.error('TerminalHistory: Error reading output:', readError);
+                    output = '[Error reading terminal output]';
+                }
+
+                // Add to history
+                historyProvider.addEntry({
+                    command: commandText.trim(),
+                    output: output.trim() || '[No output]',
+                    exitCode: e.exitCode,
+                    timestamp: new Date()
+                });
+
+            } catch (error) {
+                console.error('TerminalHistory: Error in terminal listener:', error);
+            }
+        }
+    );
+
+    // Listen for diagnostic changes (problems)
+    const diagnosticListener = vscode.languages.onDidChangeDiagnostics((e) => {
+        // Optional: Auto-capture problems when they change
+        // Uncomment if you want automatic capture
+        // console.log('TerminalHistory: Diagnostics changed for', e.uris.length, 'files');
+    });
+
+    // Add all disposables to subscriptions
+    context.subscriptions.push(
+        copyCommand, 
+        clearCommand, 
+        captureProblemsCommand,
+        terminalCommandListener,
+        diagnosticListener
+    );
+
+    vscode.window.showInformationMessage('Terminal History extension is now active!');
+    console.log('TerminalHistory: Extension activated successfully');
 }
 
-// This method is called when your extension is deactivated
-export function deactivate() {}
+export function deactivate() {
+    console.log('TerminalHistory: Extension deactivated');
+}

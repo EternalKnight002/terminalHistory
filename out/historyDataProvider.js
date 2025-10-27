@@ -35,53 +35,89 @@ var __importStar = (this && this.__importStar) || (function () {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.HistoryTreeItem = exports.HistoryDataProvider = void 0;
 const vscode = __importStar(require("vscode"));
-// The class that provides data to the TreeView
 class HistoryDataProvider {
-    // An event emitter to tell VS Code when our data changes
     _onDidChangeTreeData = new vscode.EventEmitter();
     onDidChangeTreeData = this._onDidChangeTreeData.event;
-    // Our internal data store
     history = [];
+    maxHistoryItems = 100; // Limit history to prevent memory issues
     constructor() {
+        console.log('HistoryDataProvider: Initialized');
     }
-    // A public method to add new entries and refresh the view
     addEntry(item) {
-        this.history.unshift(item); // Add new items to the top
-        this._onDidChangeTreeData.fire(); // Tell VS Code to refresh
+        console.log('HistoryDataProvider: Adding entry:', item.command.substring(0, 50));
+        // Add to the beginning of the array (most recent first)
+        this.history.unshift(item);
+        // Limit history size
+        if (this.history.length > this.maxHistoryItems) {
+            this.history = this.history.slice(0, this.maxHistoryItems);
+        }
+        // Notify VS Code to refresh the view
+        this._onDidChangeTreeData.fire();
     }
-    // Required method: returns the visual representation (TreeItem) of an element
+    clearHistory() {
+        this.history = [];
+        this._onDidChangeTreeData.fire();
+    }
     getTreeItem(element) {
         return element;
     }
-    // Required method: returns the children of an element or root
     getChildren(element) {
         if (element) {
-            // Our items don't have children (they are not expandable yet)
+            // No nested children
             return Promise.resolve([]);
         }
-        else {
-            // This is the root level, return all our history items
-            const treeItems = this.history.map(item => new HistoryTreeItem(item.command, item.output, vscode.TreeItemCollapsibleState.None));
-            return Promise.resolve(treeItems);
+        if (this.history.length === 0) {
+            // Return empty array if no history
+            return Promise.resolve([]);
         }
+        // Convert history items to tree items
+        const treeItems = this.history.map((item, index) => {
+            return new HistoryTreeItem(item.command, item.output, item.exitCode, item.timestamp, index);
+        });
+        return Promise.resolve(treeItems);
     }
 }
 exports.HistoryDataProvider = HistoryDataProvider;
-// Our custom TreeItem that holds the full output data
 class HistoryTreeItem extends vscode.TreeItem {
-    label;
     fullOutput;
-    collapsibleState;
-    constructor(label, // The command will be the label
-    fullOutput, // The full output, for copying
-    collapsibleState) {
-        super(label, collapsibleState);
-        this.label = label;
-        this.fullOutput = fullOutput;
-        this.collapsibleState = collapsibleState;
-        this.tooltip = `Command: ${this.label}`;
-        // Show the first line of the output as the description
-        this.description = this.fullOutput.split('\n')[0];
+    commandText;
+    exitCode;
+    timestamp;
+    index;
+    constructor(command, output, exitCode, timestamp, index) {
+        // Call parent constructor with label only
+        super(command.length > 60 ? command.substring(0, 57) + '...' : command, vscode.TreeItemCollapsibleState.None);
+        // Set properties
+        this.commandText = command;
+        this.fullOutput = output;
+        this.exitCode = exitCode;
+        this.timestamp = timestamp;
+        this.index = index;
+        // Show time and exit code in description
+        const timeStr = timestamp.toLocaleTimeString();
+        const exitCodeStr = exitCode !== undefined ? ` [${exitCode}]` : '';
+        this.description = `${timeStr}${exitCodeStr}`;
+        // Show first line of output in tooltip
+        const firstLine = output.split('\n')[0];
+        const tooltipMd = new vscode.MarkdownString();
+        tooltipMd.appendCodeblock(command, 'bash');
+        tooltipMd.appendMarkdown(`**Exit Code:** ${exitCode ?? 'N/A'}\n\n`);
+        tooltipMd.appendMarkdown(`**Time:** ${timestamp.toLocaleString()}\n\n`);
+        tooltipMd.appendMarkdown(`**Output (first line):**\n`);
+        tooltipMd.appendCodeblock(firstLine || '[empty]', 'text');
+        this.tooltip = tooltipMd;
+        // Set icon based on exit code
+        if (exitCode === 0) {
+            this.iconPath = new vscode.ThemeIcon('pass', new vscode.ThemeColor('testing.iconPassed'));
+        }
+        else if (exitCode !== undefined && exitCode !== 0) {
+            this.iconPath = new vscode.ThemeIcon('error', new vscode.ThemeColor('testing.iconFailed'));
+        }
+        else {
+            this.iconPath = new vscode.ThemeIcon('terminal');
+        }
+        // Set context value for menu contributions
+        this.contextValue = 'historyItem';
     }
 }
 exports.HistoryTreeItem = HistoryTreeItem;
