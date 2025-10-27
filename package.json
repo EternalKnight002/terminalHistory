@@ -2,7 +2,7 @@
   "name": "terminalhistory",
   "displayName": "Terminal History",
   "description": "Logs terminal command outputs and code problems for easy copying",
-  "version": "0.1.0",
+  "version": "2.0.0",
   "publisher": "EternalKnight002",
   "license": "MIT",
   "repository": {
