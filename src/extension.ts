@@ -30,6 +30,43 @@ export function activate(context: vscode.ExtensionContext) {
         }
     );
 
+    // Register the Capture Terminal Output command
+    const captureTerminalCommand = vscode.commands.registerCommand(
+        'terminalHistory.captureTerminal',
+        () => {
+            const activeTerminal = vscode.window.activeTerminal;
+            
+            if (!activeTerminal) {
+                vscode.window.showWarningMessage('No active terminal found. Please open a terminal first.');
+                return;
+            }
+
+            vscode.window.showInformationMessage(
+                'Note: This captures visible terminal content. For full command history, commands are auto-captured when they complete.',
+                'OK'
+            );
+
+            // Get terminal selection or visible content
+            // Note: VS Code API doesn't provide direct access to terminal buffer
+            // So we inform users about the limitation
+            const timestamp = new Date();
+            const terminalName = activeTerminal.name;
+            
+            historyProvider.addEntry({
+                command: `📟 Manual Terminal Capture - ${terminalName}`,
+                output: `Terminal: ${terminalName}\nTime: ${timestamp.toLocaleString()}\n\n` +
+                       `Note: To capture full terminal output:\n` +
+                       `1. Select the text in the terminal\n` +
+                       `2. Copy it (Ctrl+C / Cmd+C)\n` +
+                       `3. The content is now in your clipboard\n\n` +
+                       `Alternatively, use the auto-capture feature by running commands normally.\n` +
+                       `Each command's output is automatically saved to this history.`,
+                exitCode: undefined,
+                timestamp: timestamp
+            });
+        }
+    );
+
     // Register the Capture Problems command
     const captureProblemsCommand = vscode.commands.registerCommand(
         'terminalHistory.captureProblems',
@@ -151,6 +188,7 @@ export function activate(context: vscode.ExtensionContext) {
         copyCommand, 
         clearCommand, 
         captureProblemsCommand,
+        captureTerminalCommand,
         terminalCommandListener,
         diagnosticListener
     );

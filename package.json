@@ -2,7 +2,7 @@
   "name": "terminalhistory",
   "displayName": "Terminal History",
   "description": "Logs terminal command outputs and code problems for easy copying",
-  "version": "0.1.0",
+  "version": "2.0.0",
   "publisher": "EternalKnight002",
   "license": "MIT",
   "repository": {
@@ -50,6 +50,11 @@
         "command": "terminalHistory.captureProblems",
         "title": "Capture Problems",
         "icon": "$(issues)"
+      },
+      {
+        "command": "terminalHistory.captureTerminal",
+        "title": "Capture Terminal Output",
+        "icon": "$(terminal)"
       }
     ],
     "viewsContainers": {
@@ -72,14 +77,19 @@
     "menus": {
       "view/title": [
         {
-          "command": "terminalHistory.captureProblems",
+          "command": "terminalHistory.captureTerminal",
           "when": "view == terminal-history-view",
           "group": "navigation@1"
         },
         {
-          "command": "terminalHistory.clearHistory",
+          "command": "terminalHistory.captureProblems",
           "when": "view == terminal-history-view",
           "group": "navigation@2"
+        },
+        {
+          "command": "terminalHistory.clearHistory",
+          "when": "view == terminal-history-view",
+          "group": "navigation@3"
         }
       ],
       "view/item/context": [
