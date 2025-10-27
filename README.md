@@ -106,7 +106,7 @@ npm run watch
 
 ## 📄 License
 
-This project is open-source under the MIT License.
+This project is open-source under the [MIT License](LICENSE).
 
 ## 🤝 Contributing
 
