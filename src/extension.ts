@@ -46,9 +46,7 @@ export function activate(context: vscode.ExtensionContext) {
                 'OK'
             );
 
-            // Get terminal selection or visible content
-            // Note: VS Code API doesn't provide direct access to terminal buffer
-            // So we inform users about the limitation
+            
             const timestamp = new Date();
             const terminalName = activeTerminal.name;
             
@@ -178,9 +176,7 @@ export function activate(context: vscode.ExtensionContext) {
 
     // Listen for diagnostic changes (problems)
     const diagnosticListener = vscode.languages.onDidChangeDiagnostics((e) => {
-        // Optional: Auto-capture problems when they change
-        // Uncomment if you want automatic capture
-        // console.log('TerminalHistory: Diagnostics changed for', e.uris.length, 'files');
+        
     });
 
     // Add all disposables to subscriptions
